@@ -1,0 +1,145 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://example.com/example.json",
+    "title": "Bird report",
+    "description": "A report of the number of birds at a particular time and location",
+    "type": "object",
+    "examples": [
+        {
+            "timestamp": 1637980031800,
+            "location": [
+                {
+                    "latitude": 0.0,
+                    "longitude": 0.0
+                },
+                {
+                    "latitude": 0.0,
+                    "longitude": 1.5
+                },
+                {
+                    "latitude": 1.5,
+                    "longitude": 1.5
+                },
+                {
+                    "latitude": 1.5,
+                    "longitude": 0
+                }
+            ],
+            "species": [
+                {
+                    "name": "sulphur-crested cockatoo",
+                    "scientific_name": "Cacatua galerita",
+                    "count": 100
+                },
+                {
+                    "name": "magpie",
+                    "scientific_name": "Gymnorhina tibicen",
+                    "count": 300
+                },
+                {
+                    "name": "black swan",
+                    "scientific_name": "Cygnus atratus",
+                    "count": 50
+                }
+            ]
+        }
+    ],
+    "required": [
+        "timestamp",
+        "location",
+        "species"
+    ],
+    "properties": {
+        "timestamp": {
+            "description": "Time in ms since epoch",
+            "type": "integer",
+            "examples": [
+                1637980031800
+            ]
+        },
+        "location": {
+            "description": "Coordinates to a quadrilateral enclosed area, must have exactly 4 coordinates",
+            "type": "array",
+            "minItems": 4,
+            "maxItems": 4,
+            "items": {
+                "description": "A coordinate consisting of latitude and longitude",
+                "type": "object",
+                "examples": [
+                    {
+                        "latitude": 0.0,
+                        "longitude": 0.0
+                    }
+                ],
+                "required": [
+                    "latitude",
+                    "longitude"
+                ],
+                "properties": {
+                    "latitude": {
+                        "description": "latitude of coordinate",
+                        "type": "number"
+                    },
+                    "longitude": {
+                        "description": "longitude of coordinate",
+                        "type": "number"
+                    }
+                }
+            }
+        },
+        "species": {
+            "type": "array",
+            "description": "An array of bird counts organised by species",
+            "examples": [
+                [
+                    {
+                        "name": "sulphur-crested cockatoo",
+                        "scientific_name": "Cacatua galerita",
+                        "count": 100
+                    },
+                    {
+                        "name": "magpie",
+                        "scientific_name": "Gymnorhina tibicen",
+                        "count": 300
+                    }
+                ]
+            ],
+            "items": {
+                "description": "Data for a single bird species",
+                "type": "object",
+                "examples": [
+                    {
+                        "name": "sulphur-crested cockatoo",
+                        "scientific_name": "Cacatua galerita",
+                        "count": 100
+                    }
+                ],
+                "required": [
+                    "name",
+                    "scientific_name",
+                    "count"
+                ],
+                "properties": {
+                    "name": {
+                        "description": "common name of the bird species",
+                        "type": "string",
+                        "examples": [
+                            "sulphur-crested cockatoo"
+                        ]
+                    },
+                    "scientific_name": {
+                        "description": "scientific name of the bird species",
+                        "type": "string",
+                        "examples": [
+                            "Cacatua galerita"
+                        ]
+                    },
+                    "count": {
+                        "description": "number of birds of this species sighted",
+                        "type": "integer"
+                    }
+                }
+            }
+        }
+    }
+}

@@ -52,24 +52,18 @@ The JSON data structure will represent a (hypothetical) report on the number of 
 
 ```js
 {
-    // int: time in ms since epoch
     "timestamp": 1637980031800,
-    // coordinates to a quadrilateral enclosed area, must have exactly 4 coordinates
     "location": [
         {
-            "latitude": 0.0, // float
-            "longitude": 0.0 // float
+            "latitude": 0.0,
+            "longitude": 0.0
         },
         ...
     ],
-    // list of species and reported numbers
     "species": [
         {
-            // string: common name of the bird species
             "name": "duck",
-            // string: scientific name of the bird species
             "scientific_name": "Duccus duccus",
-            // int: number of birds
             "count": 10,
         }, 
         ...
@@ -86,6 +80,16 @@ The app will be in the following context:
 - the app will simply be run when necessary (as opposed to being hosted as an always-on service)
 
 ## Process
+
+- After planning and writing an example json...
+- Scaffolding the app
+  - adding the 4 functions and the basic control flow in main()
+  - typing the 4 functions and passing arguments in main
+    - simple struct for Report to start with
+    - will leave the actual return type of post function until we add the http package
+- Adding the JSON schema
+  - generated from the example json using www.jsonschema.net
+  - edited to remove unnecessary details
 
 ### Challenges
 
