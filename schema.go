@@ -11,8 +11,8 @@ import (
 // BirdReport A report of the number of birds at a particular time and location
 type BirdReport struct {
 
-	// Coordinates to a quadrilateral enclosed area, must have exactly 4 coordinates
-	Location []*LocationItems `json:"location"`
+	// Coordinates to a point and height (NS) and length (EW) of the area
+	Location *Location `json:"location"`
 
 	// An array of bird counts organised by species
 	Species []*SpeciesItems `json:"species"`
@@ -21,14 +21,27 @@ type BirdReport struct {
 	Timestamp int `json:"timestamp"`
 }
 
-// LocationItems A coordinate consisting of latitude and longitude
-type LocationItems struct {
+// Coordinate A coordinate consisting of latitude and longitude
+type Coordinate struct {
 
 	// latitude of coordinate
 	Latitude float64 `json:"latitude"`
 
 	// longitude of coordinate
 	Longitude float64 `json:"longitude"`
+}
+
+// Location Coordinates to a point and height (NS) and length (EW) of the area
+type Location struct {
+
+	// A coordinate consisting of latitude and longitude
+	Coordinate *Coordinate `json:"coordinate"`
+
+	// North-South length of the area around the coordinate in km
+	Height float64 `json:"height"`
+
+	// East-West length of the area around the coordinate in km
+	Length float64 `json:"length"`
 }
 
 // SpeciesItems Data for a single bird species
@@ -49,7 +62,9 @@ func (strct *BirdReport) MarshalJSON() ([]byte, error) {
 	buf.WriteString("{")
 	comma := false
 	// "Location" field is required
-	// only required object types supported for marshal checking (for now)
+	if strct.Location == nil {
+		return nil, errors.New("location is a required field")
+	}
 	// Marshal the "location" field
 	if comma {
 		buf.WriteString(",")
@@ -136,7 +151,7 @@ func (strct *BirdReport) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (strct *LocationItems) MarshalJSON() ([]byte, error) {
+func (strct *Coordinate) MarshalJSON() ([]byte, error) {
 	buf := bytes.NewBuffer(make([]byte, 0))
 	buf.WriteString("{")
 	comma := false
@@ -172,7 +187,7 @@ func (strct *LocationItems) MarshalJSON() ([]byte, error) {
 	return rv, nil
 }
 
-func (strct *LocationItems) UnmarshalJSON(b []byte) error {
+func (strct *Coordinate) UnmarshalJSON(b []byte) error {
 	latitudeReceived := false
 	longitudeReceived := false
 	var jsonMap map[string]json.RawMessage
@@ -201,6 +216,100 @@ func (strct *LocationItems) UnmarshalJSON(b []byte) error {
 	// check if longitude (a required property) was received
 	if !longitudeReceived {
 		return errors.New("\"longitude\" is required but was not present")
+	}
+	return nil
+}
+
+func (strct *Location) MarshalJSON() ([]byte, error) {
+	buf := bytes.NewBuffer(make([]byte, 0))
+	buf.WriteString("{")
+	comma := false
+	// "Coordinate" field is required
+	if strct.Coordinate == nil {
+		return nil, errors.New("coordinate is a required field")
+	}
+	// Marshal the "coordinate" field
+	if comma {
+		buf.WriteString(",")
+	}
+	buf.WriteString("\"coordinate\": ")
+	if tmp, err := json.Marshal(strct.Coordinate); err != nil {
+		return nil, err
+	} else {
+		buf.Write(tmp)
+	}
+	comma = true
+	// "Height" field is required
+	// only required object types supported for marshal checking (for now)
+	// Marshal the "height" field
+	if comma {
+		buf.WriteString(",")
+	}
+	buf.WriteString("\"height\": ")
+	if tmp, err := json.Marshal(strct.Height); err != nil {
+		return nil, err
+	} else {
+		buf.Write(tmp)
+	}
+	comma = true
+	// "Length" field is required
+	// only required object types supported for marshal checking (for now)
+	// Marshal the "length" field
+	if comma {
+		buf.WriteString(",")
+	}
+	buf.WriteString("\"length\": ")
+	if tmp, err := json.Marshal(strct.Length); err != nil {
+		return nil, err
+	} else {
+		buf.Write(tmp)
+	}
+	comma = true
+
+	buf.WriteString("}")
+	rv := buf.Bytes()
+	return rv, nil
+}
+
+func (strct *Location) UnmarshalJSON(b []byte) error {
+	coordinateReceived := false
+	heightReceived := false
+	lengthReceived := false
+	var jsonMap map[string]json.RawMessage
+	if err := json.Unmarshal(b, &jsonMap); err != nil {
+		return err
+	}
+	// parse all the defined properties
+	for k, v := range jsonMap {
+		switch k {
+		case "coordinate":
+			if err := json.Unmarshal([]byte(v), &strct.Coordinate); err != nil {
+				return err
+			}
+			coordinateReceived = true
+		case "height":
+			if err := json.Unmarshal([]byte(v), &strct.Height); err != nil {
+				return err
+			}
+			heightReceived = true
+		case "length":
+			if err := json.Unmarshal([]byte(v), &strct.Length); err != nil {
+				return err
+			}
+			lengthReceived = true
+		}
+	}
+	// check if coordinate (a required property) was received
+	if !coordinateReceived {
+		return errors.New("\"coordinate\" is required but was not present")
+	}
+	// check if height (a required property) was received
+	if !heightReceived {
+		return errors.New("\"height\" is required but was not present")
+	}
+	// check if length (a required property) was received
+	if !lengthReceived {
+		return errors.New("\"length\" is required but was not present")
 	}
 	return nil
 }
