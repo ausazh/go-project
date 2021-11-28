@@ -46,7 +46,7 @@ The app will have 4 primary functions as stated above, these will be the 4 prima
   - sends a POST request to an API including the json object
   - returns the response from the API (which is ultimately discarded, but can be used if the app is extended further)
 
-### Data structure
+### Planned data structure
 
 The JSON data structure will represent a (hypothetical) report on the number of birds present in an area, structured as follows:
 
@@ -73,11 +73,36 @@ The JSON data structure will represent a (hypothetical) report on the number of 
 
 ## Overview
 
-The app will be in the following context:
+The app is made in the following context:
 
 - a separate app provides a JSON object as input to this app, this object will be supplied in the app directory as `input.json`
 - we are programming an app that validates this input and logs it before passing it on (unchanged) to be processed by the API located at `https://random-birds.free.beeceptor.com/birdcounts` (via a `POST` method)
-- the app will simply be run when necessary (as opposed to being hosted as an always-on service)
+- the app will be run when necessary (as opposed to being hosted as an always-on service)
+
+The app has 4 primary functions as follows:
+
+- retrieveData(path string) => struct, error
+  - if path not supplied, then default to `./input.json`
+  - turns JSON object into a go struct and returns the struct
+  - unmarshalling handled by code generated from schema
+  - raises an error if structure/type is wrong or fields are missing
+- validateData(data struct) => bool
+  - validates the numeric components of the data
+    - these aren't validated during unmarshalling
+  - returns whether the data passes these validation steps
+- logData(data struct) => no return
+  - goes through the data structure and logs each part according to type
+  - does not return anything
+- postData(data struct) => http response, error
+  - converts the struct back into a json object
+  - sends a POST request to an API including the json object
+  - returns the response from the API
+
+The main function uses these 4 functions, passing in the required variables and handling them as required, as well as logging after each step.
+
+The `schema.go` file is automatically generated using <https://github.com/a-h/generate>, providing struct types and JSON un/marshalling based on the schema described in `bird_report_schema.json`
+
+An example json file is given in `input.json`.
 
 ## Process, Challenges, Considerations
 
@@ -100,7 +125,6 @@ The app will be in the following context:
     - Parses a json missing fields but raises it as an error: check
     - Parses a json with an unexpected structure, raises an error: check
     - Parses a json with extra fields with no issues: yes (I guess this is probably beneficial behaviour, to allow the JSON to be extended while still letting it be used by this app)
-  - While writing error handling, I realised sometimes I would need to exit the function without a resulting BirdReport object, so I refactored the Retrieve function to look more similar to the UnmarshalJSON and other functions, in terms of taking in a pointer to the BirdReport object and returning the error rather than returning the BirdReport object which may or may not exist - I figured that seemed to be a common pattern for Go functions with that kind of functionality
 - VALIDATE DATA
   - while much of the validation is done in UnmarshalJSON, there are still a few extra things we need to check
   - CHANGING THE SCHEMA: realised that checking coordinates is a tad tedious (e.g. need to check if 3+ coordinates lie along a line), so since the actual data structure is arbitrary, we'll replace it with a single coordinate and length and height of the area
@@ -113,5 +137,4 @@ The app will be in the following context:
 - LOG DATA
   - fairly straightforward; log each of the elements in the json object, converting and formatting them as necessary
 - POST DATA
-
-### Requirements
+  - fairly straightforward

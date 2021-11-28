@@ -1,14 +1,16 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"time"
 )
 
-func retrieveData(path string, report *BirdReport) error {
+func retrieveData(path string) (report BirdReport, err error) {
 	if path == "" {
 		path = "./input.json"
 	}
@@ -16,7 +18,7 @@ func retrieveData(path string, report *BirdReport) error {
 	// open json file
 	jsonFile, err := os.Open(path)
 	if err != nil {
-		return err
+		return report, err
 	}
 	defer jsonFile.Close()
 
@@ -25,9 +27,9 @@ func retrieveData(path string, report *BirdReport) error {
 
 	err = report.UnmarshalJSON(byteValue)
 	if err != nil {
-		return err
+		return report, err
 	}
-	return nil
+	return report, nil
 }
 
 func validateData(data BirdReport) error {
@@ -85,14 +87,22 @@ func logData(data BirdReport) {
 	fmt.Println()
 }
 
-func postData(data BirdReport) string {
-	return ""
+func postData(data BirdReport) (resp *http.Response, err error) {
+	postBody, err := data.MarshalJSON()
+	if err != nil {
+		return resp, err
+	}
+
+	responseBody := bytes.NewBuffer(postBody)
+	resp, err = http.Post("https://random-birds.free.beeceptor.com/birdcounts", "application/json", responseBody)
+	if err != nil {
+		return resp, err
+	}
+	return resp, nil
 }
 
 func main() {
-	var report BirdReport
-
-	err := retrieveData("", &report)
+	report, err := retrieveData("")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -107,5 +117,19 @@ func main() {
 	fmt.Println("successfully validated JSON")
 
 	logData(report)
-	postData(report)
+
+	resp, err := postData(report)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	fmt.Println("successfully posted JSON")
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	fmt.Println(string(body))
 }
