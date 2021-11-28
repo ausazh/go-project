@@ -88,8 +88,11 @@ The app will be in the following context:
     - simple struct for Report to start with
     - will leave the actual return type of post function until we add the http package
 - Adding the JSON schema
-  - generated from the example json using www.jsonschema.net
+  - generated from the example json using <https://www.jsonschema.net>
   - edited to remove unnecessary details
+- Converting JSON schema to a Go type
+  - found a solution to automate this using <https://github.com/a-h/generate>: generates structs and validation code from a json schema
+- Integrating generated struct into code
 
 ### Challenges
 

@@ -2,32 +2,46 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 )
 
-type Report struct {
-	Timestamp int64
-}
-
-func retrieveData(path string) Report {
+func retrieveData(path string) BirdReport {
 	if path == "" {
 		path = "./input.json"
 	}
-	return Report{}
+
+	// open json file
+	jsonFile, err := os.Open(path)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer jsonFile.Close()
+
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+	var report BirdReport
+	err = report.UnmarshalJSON(byteValue)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println("successfully unmarshalled JSON")
+
+	return report
 }
 
-func validateData(data Report) bool {
-	return false
+func validateData(data BirdReport) bool {
+	return true
 }
-func logData(data Report) {
+func logData(data BirdReport) {
 }
-func postData(data Report) string {
+func postData(data BirdReport) string {
 	return ""
 }
 
 func main() {
-	var data Report = retrieveData("")
-	var valid bool = validateData(data)
+	data := retrieveData("")
+	valid := validateData(data)
 	if !valid {
 		fmt.Println("Input JSON was not valid")
 		os.Exit(1)
